@@ -1,8 +1,9 @@
 <script setup>
 import { computed, ref } from 'vue';
-const props = defineProps(['items', 'cols', 'search']);
+const props = defineProps(['items', 'cols', 'search', 'noDataText']);
 const searchQuery = ref('')
-
+const itemsPerPage = ref(5)
+const currentPage = ref(1)
 console.log(typeof props.search);
 const query = computed(() => {
     if (typeof props.search === 'boolean')
@@ -35,12 +36,10 @@ const filteredItems = computed(() => {
 
     return props.items.filter((item) => {
         return item.name.toLowerCase().includes(query.value.toLowerCase())
-    })
+    }).slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
 
 })
-console.log('loaded!');
-console.log(props.search && !(typeof (props.search) === 'string'));
-
+console.log(filteredItems.value.length / itemsPerPage.value);
 
 </script>
 
@@ -57,20 +56,36 @@ console.log(props.search && !(typeof (props.search) === 'string'));
             </tr>
         </thead>
         <tbody>
-
-            <!-- <td v-for="value in Object.values(item)">
-                    <slot name="item" :item="item">
-                        {{ value }}
-                    </slot>
-                </td> -->
-            <tr v-for="item in filteredItems">
+            <tr v-if="!props.items.length">
+                <td class="text-center" :colspan="headers.length">
+                    {{ props.noDataText }}
+                </td>
+            </tr>
+            <tr v-else v-for="item in filteredItems">
                 <td v-for="[key, value] in Object.entries(item)">
                     <slot :name="'col-' + key" :item="item">
                         {{ value }}
                     </slot>
                 </td>
             </tr>
-
         </tbody>
+        <tfoot v-if="props.items.length">
+            <div class="d-flex justify-content-end align-content-center">
+                <div>
+                    <select name="itemsPerPage" class="form-select" v-model="itemsPerPage">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                    </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button v-for="index in Math.ceil(props.items.length / itemsPerPage)"
+                        :class="currentPage === index ? 'btn btn-primary' : 'btn btn-outline-dark'"
+                        @click="currentPage = index">{{ index
+                        }}</button>
+                </div>
+            </div>
+        </tfoot>
     </table>
 </template>
