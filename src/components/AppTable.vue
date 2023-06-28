@@ -4,6 +4,7 @@ const props = defineProps(['items', 'cols', 'search', 'noDataText']);
 const searchQuery = ref('')
 const itemsPerPage = ref(5)
 const currentPage = ref(1)
+const sortOrder = ref('')
 console.log(typeof props.search);
 const query = computed(() => {
     if (typeof props.search === 'boolean')
@@ -31,15 +32,32 @@ const headers = computed(() => {
     }
 })
 
+const sortBy = ref()
+
+
+const sortedItems = computed(() => {
+    console.log(sortBy.value, sortOrder.value);
+    if (sortOrder.value === 'asc') {
+        return props.items.sort((a, b) => {
+            return a[sortBy.value] > b[sortBy.value] ? 1 : -1
+        })
+    }
+    else if (sortOrder.value === 'desc') {
+        return props.items.sort((a, b) => {
+            return a[sortBy.value] > b[sortBy.value] ? -1 : 1
+        })
+    }
+    else {
+        return props.items
+    }
+})
 
 const filteredItems = computed(() => {
-
-    return props.items.filter((item) => {
+    return sortedItems.value.filter((item) => {
         return item.name.toLowerCase().includes(query.value.toLowerCase())
     }).slice((currentPage.value - 1) * itemsPerPage.value, currentPage.value * itemsPerPage.value)
 
-})
-console.log(filteredItems.value.length / itemsPerPage.value);
+});
 
 </script>
 
@@ -48,10 +66,18 @@ console.log(filteredItems.value.length / itemsPerPage.value);
     <table class="table">
         <thead>
             <tr>
-                <th v-for="col in headers">
-                    <span class="text-capitalize">
-                        {{ col.key }}
-                    </span>
+                <th v-for="col in    headers   ">
+                    <div class="d-flex align-items-center">
+                        <div class="text-capitalize">
+                            {{ col.key }}
+                        </div>
+                        <button
+                            @click="sortBy = col.key; sortOrder === '' ? sortOrder = 'asc' : sortOrder === 'asc' ? sortOrder = 'desc' : sortOrder = 'asc'"
+                            class="btn">
+                            sort
+                        </button>
+
+                    </div>
                 </th>
             </tr>
         </thead>
@@ -61,8 +87,8 @@ console.log(filteredItems.value.length / itemsPerPage.value);
                     {{ props.noDataText }}
                 </td>
             </tr>
-            <tr v-else v-for="item in filteredItems">
-                <td v-for="[key, value] in Object.entries(item)">
+            <tr v-else v-for="   item    in    filteredItems   ">
+                <td v-for="   [key, value]    in    Object.entries(item)   ">
                     <slot :name="'col-' + key" :item="item">
                         {{ value }}
                     </slot>
@@ -80,7 +106,7 @@ console.log(filteredItems.value.length / itemsPerPage.value);
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button v-for="index in Math.ceil(props.items.length / itemsPerPage)"
+                    <button v-for="   index    in    Math.ceil(props.items.length / itemsPerPage)   "
                         :class="currentPage === index ? 'btn btn-primary' : 'btn btn-outline-dark'"
                         @click="currentPage = index">{{ index
                         }}</button>
