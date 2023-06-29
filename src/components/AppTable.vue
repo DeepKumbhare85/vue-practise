@@ -66,16 +66,17 @@ const filteredItems = computed(() => {
     <table class="table">
         <thead>
             <tr>
-                <th v-for="col in    headers   ">
+                <th v-for="col in headers">
                     <div class="d-flex align-items-center">
                         <div class="text-capitalize">
-                            {{ col.key }}
+                            <button
+                                @click="sortBy = col.key; sortOrder === '' ? sortOrder = 'asc' : sortOrder === 'asc' ? sortOrder = 'desc' : sortOrder = 'asc'"
+                                class="btn btn-light">
+                                {{ col.key }}
+                                <i
+                                    :class="[sortOrder === '' ? 'bi bi-sort-up' : sortOrder === 'asc' ? 'bi bi-sort-down' : 'bi bi-sort-up', sortBy === col.key || '' ? '' : 'd-none']"></i>
+                            </button>
                         </div>
-                        <button
-                            @click="sortBy = col.key; sortOrder === '' ? sortOrder = 'asc' : sortOrder === 'asc' ? sortOrder = 'desc' : sortOrder = 'asc'"
-                            class="btn">
-                            sort
-                        </button>
 
                     </div>
                 </th>
