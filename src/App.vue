@@ -38,7 +38,7 @@ const cols = ref([
 </script>
 
 <template>
-  <AppTable :items="rows" :cols="cols" :search="false" no-data-text="No data available">
+  <AppTable :items="rows" :cols="cols" :search="true" no-data-text="No data available">
     <template #col-id="{ item }">
       My ID {{ item.id }}
     </template>
